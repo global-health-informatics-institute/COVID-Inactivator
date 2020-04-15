@@ -62,6 +62,7 @@ void waiting(){
   buttonEndState = digitalRead(buttonPin);
   if (buttonStartState != buttonEndState){
     Serial.println("Button was pressed. Toggle Oven state");
+    digitalWrite(buttonPin, 0);
     state =2;
   }
   else{
@@ -109,6 +110,7 @@ void sterilizing(){
     lcd.print(convertMins(timeCount));
     lcd.print(":");
     lcd.print(convertSecs(timeCount));
+    updateGun();
   }
 
   else {
@@ -178,71 +180,53 @@ int convertSecs(int current_time){
   return (secs);
 }
 
+void updateGun(){
+    //Initialize SPIFFS
+  #ifdef ESP32
+    if(!SPIFFS.begin(true)){
+      Serial.println("An Error has occurred while mounting SPIFFS");
+      return;
+    }
+  #else
+    if(!SPIFFS.begin()){
+      Serial.println("An Error has occurred while mounting SPIFFS");
+      return;
+    }
+  #endif
+    int current_gun = readFile(SPIFFS, "/gun.txt").toInt();
+    if(current_gun == NULL){
+    current_gun = gun_a;
+    String gun_now = String(current_gun);
+    writeFile(SPIFFS, "/gun.txt", gun_now.c_str());
+    }
+    //Checking temp once per second from the main loop
+    float checkedTemp = getTemperature();
 
-//  Ignore this section for now
-//  
-        // Initialize SPIFFS
-//  #ifdef ESP32
-//    if(!SPIFFS.begin(true)){
-//      Serial.println("An Error has occurred while mounting SPIFFS");
-//      return;
-//    }
-//  #else
-//    if(!SPIFFS.begin()){
-//      Serial.println("An Error has occurred while mounting SPIFFS");
-//      return;
-//    }
-//  #endif
-//  //Reading in memory last gun that was saved
-//  int current_gun = readFile(SPIFFS, "/gun.txt").toInt();
-//
-//  //checking if it is empty
-//  if(current_gun == NULL){
-//    current_gun = gun_a;
-//    String gun_now = String(current_gun);
-//    writeFile(SPIFFS, "/gun.txt", gun_now.c_str());
-//    }
-//
-//         //If it was the second gun then turn it off
-//        else if(current_gun == 4){
-//
-//            //Turn off gun second off
-//            digitalWrite(current_gun, LOW);
-//          
-//             while(getTemperature() >= low_temp && getTemperature() <= high_temp ){
-//              //Turn off first gun 
-//               digitalWrite(2, LOW);
-//             }
-//              //Checking If temperature is below range
-//              if(getTemperature() <= low_temp)
-//              {
-//                  //Then Turn on second gun until range temperature
-//                  while(getTemperature() <= high_temp ){
-//                   digitalWrite(current_gun, HIGH); 
-//                  }
-//
-//                  // turn off second gun if the reaches range temperatue
-//                  digitalWrite(current_gun, LOW);
-//                  
-//                  //changing current gun with idle gun 
-//                  current_gun = 2;
-//                  String gun_now = String(current_gun);
-//                  writeFile(SPIFFS, "/gun.txt", gun_now.c_str());
-//                  current_gun = readFile(SPIFFS, "/gun.txt").toInt();
-//              }
-//            }
-//
-//              //End of while loop
-//              //Shutdown Operation
-//              digitalWrite(gun_a, LOW);
-//              digitalWrite(gun_b, LOW);
-//                lcd.clear();
-//               lcd.setCursor(1,0);
-//               lcd.print("FINISHED");
-//               lcd.setCursor(1,1);
-//               lcd.print("Sterilizing :)");
-//               delay(5000);
-//              //Back to state 1
-//              state = 1;
-//              waiting();  
-            
+    if(current_gun ==4){
+      if(low_temp <= checkedTemp && high_temp >= checkedTemp){
+        digitalWrite(current_gun, LOW);
+        //changing current gun with idle gun 
+        current_gun = 2;
+        String gun_now = String(current_gun);
+        writeFile(SPIFFS, "/gun.txt", gun_now.c_str());
+        current_gun = readFile(SPIFFS, "/gun.txt").toInt();
+      }
+      if(low_temp >= checkedTemp){
+        digitalWrite(current_gun, HIGH);
+      }
+    }
+
+    else if(current_gun ==2){
+      if(low_temp <= checkedTemp && high_temp >= checkedTemp){
+        digitalWrite(current_gun, LOW);
+        //changing current gun with idle gun 
+        current_gun = 4;
+        String gun_now = String(current_gun);
+        writeFile(SPIFFS, "/gun.txt", gun_now.c_str());
+        current_gun = readFile(SPIFFS, "/gun.txt").toInt();
+      }
+      if(low_temp >= checkedTemp){
+        digitalWrite(current_gun, HIGH);
+      }
+    }
+}
