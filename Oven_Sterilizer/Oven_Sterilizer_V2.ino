@@ -83,9 +83,11 @@ void preheat(){
    digitalWrite(buttonState, HIGH);
    lcd.clear();
    lcd.setCursor(1,0);
-   lcd.print("Preheating");
+   lcd.print("Preheating...");
    lcd.setCursor(1,1);
-   lcd.print("In Process...");
+   lcd.print(getTemperature(),0);
+   lcd.print(F("\xDF""C."));
+//   lcd.print("C");
    
    if(getTemperature() > low_temp ){
     //Switching State
@@ -102,17 +104,17 @@ void preheat(){
 void sterilizing_gun_on(){
   
   lcd.clear();
-  lcd.setCursor(1,0);
-  lcd.print("Sterilizing ...");
-
-
+  lcd.setCursor(0,0);
+  lcd.print("Sterilize ");
+ 
   //Checking temp once per second from the main loop
 
   if(timeCount > 0){
 
     //get temperature from the sensor
     float checkTemp = getTemperature();
- 
+    lcd.print(checkTemp,0);
+    lcd.print(F("\xDF""C."));
     timeCount = timeCount - 1;
     //Displaying the time remaining
     Serial.println(convertMins(timeCount));
@@ -152,8 +154,8 @@ void sterilizing_gun_on(){
 void sterilizing_gun_off(){
   
   lcd.clear();
-  lcd.setCursor(1,0);
-  lcd.print("Sterilizing ...");
+  lcd.setCursor(0,0);
+  lcd.print("Sterilize ");
 
   //Checking temp once per second from the main loop
 
@@ -161,7 +163,8 @@ void sterilizing_gun_off(){
 
     //get temperature from the sensor
     float checkTemp = getTemperature();
- 
+    lcd.print(checkTemp,0);
+    lcd.print(F("\xDF""C."));
     timeCount = timeCount - 1;
     //Displaying the time remaining
     Serial.println(convertMins(timeCount));
