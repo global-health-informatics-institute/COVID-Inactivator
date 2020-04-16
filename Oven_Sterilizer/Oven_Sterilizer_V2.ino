@@ -13,8 +13,8 @@ int buttonEndState;         // variable for reading the pushbutton status
 int state =1;
 int activeGun;
 float tempC = 0;
-const float low_temp = 63;
-const float high_temp = 65;
+const float low_temp = 75;
+const float high_temp = 77;
 const int gun_a = 2;
 const int gun_b = 4;
 const int buttonPin = 5;     // the number of the pushbutton pin
@@ -90,7 +90,7 @@ void preheat(){
    if(getTemperature() > low_temp ){
     //Switching State
    state =3;
-   timeCount =120 ;  //1800   
+   timeCount = 1800;   
    }
    else{
    //Turning on Both Guns
@@ -126,13 +126,6 @@ void sterilizing_gun_on(){
     if(checkTemp > high_temp){
       digitalWrite(gun_a, LOW);
       digitalWrite(gun_b, LOW); 
-     //intialize activeGun
-      if(activeGun == gun_a){
-        activeGun = gun_b;
-      }
-      else{
-        activeGun = gun_a;
-      }
       
       //Transition to state 4
       state = 4;
