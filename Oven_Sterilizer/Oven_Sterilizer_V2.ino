@@ -105,7 +105,7 @@ void sterilizing_gun_on(){
   
   lcd.clear();
   lcd.setCursor(0,0);
-  lcd.print("Sterilize ");
+  lcd.print("Sterilizing ");
  
   //Checking temp once per second from the main loop
 
@@ -114,16 +114,31 @@ void sterilizing_gun_on(){
     //get temperature from the sensor
     float checkTemp = getTemperature();
     lcd.print(checkTemp,0);
-    lcd.print(F("\xDF""C."));
+    lcd.print(F("\xDF""C"));
     timeCount = timeCount - 1;
     //Displaying the time remaining
     Serial.println(convertMins(timeCount));
     Serial.println(convertSecs(timeCount));
     lcd.setCursor(1,1);
     lcd.print("Timer : ");
+    if(convertMins(timeCount) < 10)
+    {
+      lcd.print("0");
+      lcd.print(convertMins(timeCount));
+    }
+    else{
     lcd.print(convertMins(timeCount));
+    }
+    
     lcd.print(":");
+    if(convertSecs(timeCount) < 10)
+    {
+      lcd.print("0");
+      lcd.print(convertSecs(timeCount));
+    }
+    else{
     lcd.print(convertSecs(timeCount));
+    }
 
     if(checkTemp > high_temp){
       digitalWrite(gun_a, LOW);
@@ -155,7 +170,7 @@ void sterilizing_gun_off(){
   
   lcd.clear();
   lcd.setCursor(0,0);
-  lcd.print("Sterilize ");
+  lcd.print("Sterilizing ");
 
   //Checking temp once per second from the main loop
 
@@ -164,17 +179,32 @@ void sterilizing_gun_off(){
     //get temperature from the sensor
     float checkTemp = getTemperature();
     lcd.print(checkTemp,0);
-    lcd.print(F("\xDF""C."));
+    lcd.print(F("\xDF""C"));
     timeCount = timeCount - 1;
     //Displaying the time remaining
     Serial.println(convertMins(timeCount));
     Serial.println(convertSecs(timeCount));
     lcd.setCursor(1,1);
     lcd.print("Timer : ");
+    if(convertMins(timeCount) < 10)
+    {
+      lcd.print("0");
+      lcd.print(convertMins(timeCount));
+    }
+    else{
     lcd.print(convertMins(timeCount));
+    }
+    
     lcd.print(":");
+    if(convertSecs(timeCount) < 10)
+    {
+      lcd.print("0");
+      lcd.print(convertSecs(timeCount));
+    }
+    else{
     lcd.print(convertSecs(timeCount));
-
+    }
+    
     if(checkTemp <low_temp){  
       digitalWrite(activeGun, HIGH);  
       if(activeGun == gun_a){
