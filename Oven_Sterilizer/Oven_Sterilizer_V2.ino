@@ -11,13 +11,13 @@ int buttonState;         // variable for reading the pushbutton status
 int buttonStartState;         // variable for reading the pushbutton status
 int buttonEndState;         // variable for reading the pushbutton status
 int state =1;
+int activeGun;
 float tempC = 0;
 const float low_temp = 63;
 const float high_temp = 65;
 const int gun_a = 2;
 const int gun_b = 4;
 const int buttonPin = 5;     // the number of the pushbutton pin
-int activeGun = gun_a;
 
 LiquidCrystal_I2C lcd(0x27,20,4);  // set the LCD address to 0x27 for a 16 chars and 2 line display
 Weather sensor;
@@ -28,6 +28,7 @@ void setup() {
   pinMode(gun_b, OUTPUT);
   pinMode(buttonPin, INPUT);
   digitalWrite(buttonPin, 0);
+  activeGun = gun_a;
   Serial.begin(9600);
   //Initialize the I2C sensor and ping it
   sensor.begin();
@@ -155,7 +156,6 @@ void sterilizing_gun_on(){
 }
 
 //state 4
-
 void sterilizing_gun_off(){
   
   lcd.clear();
@@ -179,10 +179,8 @@ void sterilizing_gun_off(){
     lcd.print(":");
     lcd.print(convertSecs(timeCount));
 
-    if(checkTemp < high_temp){
-      digitalWrite(gun_a, LOW);
-      digitalWrite(gun_b, LOW); 
-      //intialize activeGun
+    if(checkTemp <low_temp){  
+      digitalWrite(activeGun, HIGH);  
       if(activeGun == gun_a){
         activeGun = gun_b;
       }
