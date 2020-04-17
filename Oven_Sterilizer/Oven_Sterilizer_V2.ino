@@ -1,6 +1,4 @@
 #include "SparkFun_Si7021_Breakout_Library.h"
-#include "Countimer.h"
-#include <SPIFFS.h> 
 #include <Wire.h>
 #include <LiquidCrystal_I2C.h>
 
@@ -68,7 +66,7 @@ void waiting(){
   delay(1000);
   buttonEndState = digitalRead(buttonPin);
   if (buttonStartState != buttonEndState){
-    Serial.println("Button was pressed. Toggle Oven state");
+    //Serial.println("Button was pressed. Toggle Oven state");
     digitalWrite(buttonPin, 0);
     state =2;
   }
@@ -79,17 +77,15 @@ void waiting(){
 
 //State 2
 void preheat(){
-   
+   float checkedTemp = getTemperature();
    digitalWrite(buttonState, HIGH);
    lcd.clear();
    lcd.setCursor(1,0);
    lcd.print("Preheating...");
    lcd.setCursor(1,1);
-   lcd.print(getTemperature(),0);
+   lcd.print(checkedTemp,0);
    lcd.print(F("\xDF""C."));
-//   lcd.print("C");
-   
-   if(getTemperature() > low_temp ){
+   if(checkedTemp > low_temp ){
     //Switching State
    state =3;
    timeCount = 1800;   
@@ -117,8 +113,6 @@ void sterilizing_gun_on(){
     lcd.print(F("\xDF""C"));
     timeCount = timeCount - 1;
     //Displaying the time remaining
-    Serial.println(convertMins(timeCount));
-    Serial.println(convertSecs(timeCount));
     lcd.setCursor(1,1);
     lcd.print("Timer : ");
     if(convertMins(timeCount) < 10)
@@ -182,8 +176,6 @@ void sterilizing_gun_off(){
     lcd.print(F("\xDF""C"));
     timeCount = timeCount - 1;
     //Displaying the time remaining
-    Serial.println(convertMins(timeCount));
-    Serial.println(convertSecs(timeCount));
     lcd.setCursor(1,1);
     lcd.print("Timer : ");
     if(convertMins(timeCount) < 10)
@@ -206,13 +198,8 @@ void sterilizing_gun_off(){
     }
     
     if(checkTemp <low_temp){  
-      digitalWrite(activeGun, HIGH);  
-      if(activeGun == gun_a){
-        activeGun = gun_b;
-      }
-      else{
-        activeGun = gun_a;
-      }
+      digitalWrite(gun_a, HIGH);  
+      digitalWrite(gun_b, HIGH); 
       //Transition to state 3
       state = 3;
     }
@@ -239,7 +226,7 @@ float getTemperature(){
   //Get readings from Sensor
   //Measure Temperature from Si7021
   tempC = sensor.getTemp();
-  Serial.println(tempC);
+  Serial.println(tempC,0);
   return tempC;
   
 }
