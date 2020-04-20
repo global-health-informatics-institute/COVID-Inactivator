@@ -3,7 +3,7 @@
 #include <Wire.h>
 
 const float high_temp = 77;
-const float low_temp = 75;
+const float low_temp = 76;
 const int buttonPin = 5;     // the number of the pushbutton pin
 const int gun_a = 2;
 const int gun_b = 4;
@@ -134,7 +134,7 @@ void sterilizing_gun_on()
        lcd.setCursor(1,0);
        lcd.print("Finished");
        lcd.setCursor(1,1);
-       lcd.print("Sterilizing :)"); 
+       lcd.print("Successfully :)"); 
        state = 1; //Back to State 1
     }
 }
@@ -179,9 +179,9 @@ void sterilizing_gun_off()
      digitalWrite(gun_b, LOW);
      lcd.clear();
      lcd.setCursor(1,0);
-     lcd.print("Finished");
+     lcd.print("Finished :)");
      lcd.setCursor(1,1);
-     lcd.print("Sterilizing :)");
+     lcd.print("Successfully :)");
      state = 1; //Back to State 1
      }
 }
