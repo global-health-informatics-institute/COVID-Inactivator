@@ -17,6 +17,8 @@ int timeCount;
 
 LiquidCrystal_I2C lcd(0x27,20,4);  // set the LCD address to 0x27 for a 16 chars and 2 line display
 Weather sensor;
+Weather sensor_upper_chamber;
+
 
 void setup() 
 {
@@ -131,10 +133,8 @@ void sterilizing_gun_on()
        digitalWrite(gun_a, LOW);
        digitalWrite(gun_b, LOW);
        lcd.clear();
-       lcd.setCursor(1,0);
+       lcd.setCursor(4,0);
        lcd.print("Finished");
-       lcd.setCursor(1,1);
-       lcd.print("Successfully :)"); 
        state = 1; //Back to State 1
     }
 }
@@ -178,10 +178,8 @@ void sterilizing_gun_off()
      digitalWrite(gun_a, LOW);
      digitalWrite(gun_b, LOW);
      lcd.clear();
-     lcd.setCursor(1,0);
-     lcd.print("Finished :)");
-     lcd.setCursor(1,1);
-     lcd.print("Successfully :)");
+     lcd.setCursor(4,0);
+     lcd.print("Finished");
      state = 1; //Back to State 1
      }
 }
