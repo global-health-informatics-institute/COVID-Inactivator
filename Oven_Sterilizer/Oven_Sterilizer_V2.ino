@@ -14,11 +14,11 @@ int buttonStartState;         // variable for reading the pushbutton status
 int current_gun;        // variable for reading the pushbutton status
 int state =1;
 int timeCount;
+String convertedTemp;
 
 LiquidCrystal_I2C lcd(0x27,20,4);  // set the LCD address to 0x27 for a 16 chars and 2 line display
 Weather sensor;
 Weather sensor_upper_chamber;
-
 
 void setup() 
 {
@@ -27,24 +27,27 @@ void setup()
   pinMode(buttonPin, INPUT);
   digitalWrite(buttonPin, 0);
   Serial.begin(9600);
+  lcd.begin();
+  lcd.backlight();
   //Initialize the I2C sensor and ping it
-  sensor.begin();  
+  sensor.begin();
+    
 }
 
 void loop() 
 {
-  if (state == 1){
+  if (state == 1)
     waiting();
-  }
-  else if (state == 2){
+
+  else if (state == 2)
     preheat();
-  }
-  else if (state == 3){
+
+  else if (state == 3)
     sterilizing_gun_on();
-  }
-  else if (state == 4){
+  
+  else if (state == 4)
     sterilizing_gun_off();
-  }
+ 
   delay(1000);
 }
 
@@ -52,12 +55,7 @@ void loop()
 void waiting()
 {
  //Set LCD to Push Button to Start
-  lcd.begin();
-  lcd.backlight();
-  lcd.setCursor(1,0);
-  lcd.print("PUSH THE BUTTON");
-  lcd.setCursor(1,1);
-  lcd.print("TO START");
+  updateLCD("PUSH THE BUTTON", "TO START");
   buttonStartState = digitalRead(buttonPin);
   delay(1000);
   buttonEndState = digitalRead(buttonPin);
@@ -73,68 +71,35 @@ void waiting()
 //State 2
 void preheat()
 {
-   float checkedTemp = getTemperature();
-   lcd.clear();
-   lcd.setCursor(1,0);
-   lcd.print("Preheating...");
-   lcd.setCursor(4,1);
-   lcd.print(checkedTemp,0);
-   lcd.print(F("/77\xDF""C"));  
+   float checkedTemp = (getTemperature(),0);
+   convertedTemp =  String(checkedTemp);
+   updateLCD("Preheating..", convertedTemp);
    //Checking temp from sensor vs set low temperature
    if(checkedTemp > low_temp ){
      //Switching State
      state =3;
      timeCount = 1800;   
    } else{
-       //Turning on Both Guns
-       digitalWrite(gun_a, HIGH);
-       digitalWrite(gun_b, HIGH);
+       turnOnGuns();
      }
 }
 
 //state 3
 void sterilizing_gun_on()
 {
-  lcd.clear();
-  lcd.setCursor(0,0);
-  lcd.print("Inactivating.... ");
-  lcd.setCursor(0,1);
   //Checking temp once per second from the main loop
   if(timeCount > 0){
-    float checkTemp = getTemperature(); //get temperature from the sensor
-    //Display Temperature
-    lcd.print(checkTemp,0);
-    lcd.print(F("\xDF""C."));
+    float checkedTemp = (getTemperature(),0);
+    convertedTemp =  String(checkedTemp);
+    updateLCD("Inactivating...", convertedTemp + " " + F("\xDF""C.") + " " + "Timer:" + convertTime(timeCount) );
     timeCount = timeCount - 1;
-    //Displaying the time remaining
-    lcd.print("Timer:");
-    //Adding zero to minutes to appear as two digits
-    if(convertMins(timeCount) < 10){
-      lcd.print("0");
-      lcd.print(convertMins(timeCount));
-    } else{
-        lcd.print(convertMins(timeCount));
-      }
-    //Adding zero to Seconds to appear as two digits
-    lcd.print(":");
-    if(convertSecs(timeCount) < 10){
-      lcd.print("0");
-      lcd.print(convertSecs(timeCount));
-    } else{
-        lcd.print(convertSecs(timeCount));
-      }
-    if(checkTemp > high_temp){
-      digitalWrite(gun_a, LOW);
-      digitalWrite(gun_b, LOW); 
+    if(checkedTemp > high_temp){
+      turnOffGuns(); 
       state = 4;  //Transition to state 4
     }
   } else {
-       //Turning on Both Guns
-       digitalWrite(gun_a, LOW);
-       digitalWrite(gun_b, LOW);
-       lcd.clear();
-       lcd.setCursor(4,0);
-       lcd.print("Finished");
+       turnOffGuns();
+       updateLCD("Finished"," ");
        state = 1; //Back to State 1
     }
 }
@@ -142,60 +107,62 @@ void sterilizing_gun_on()
 //state 4
 void sterilizing_gun_off()
 {
-  lcd.clear();
-  lcd.setCursor(0,0);
-  lcd.print("Inactivating.... ");
-  lcd.setCursor(0,1);
   //Checking temp once per second from the main loop
   if(timeCount > 0){
-    float checkTemp = getTemperature(); //get temperature from the sensor
-    lcd.print(checkTemp,0); //Display Temperature
-    lcd.print(F("\xDF""C."));
+    float checkedTemp = (getTemperature(),0);
+    convertedTemp =  String(checkedTemp);
+    updateLCD("Inactivating...", convertedTemp + " " + F("\xDF""C.") + " " + "Timer:" + convertTime(timeCount) );
     timeCount = timeCount - 1;
-    lcd.print("Timer:"); //Displaying the time remaining
-    if(convertMins(timeCount) < 10){
-      lcd.print("0");
-      lcd.print(convertMins(timeCount));
-    } else{
-        lcd.print(convertMins(timeCount));
-      }
-    //Adding zero to Seconds to appear as two digits
-    lcd.print(":");
-    if(convertSecs(timeCount) < 10){
-      lcd.print("0");
-      lcd.print(convertSecs(timeCount));
-    } else{
-        lcd.print(convertSecs(timeCount));
-      }
-    if(checkTemp <low_temp){  
-      digitalWrite(gun_a, HIGH);  
-      digitalWrite(gun_b, HIGH); 
+    if(checkedTemp <low_temp){  
+      turnOnGuns(); 
       //Transition to state 3
       state = 3;
     }
   } else {
      //Turning on Both Guns
-     digitalWrite(gun_a, LOW);
-     digitalWrite(gun_b, LOW);
-     lcd.clear();
-     lcd.setCursor(4,0);
-     lcd.print("Finished");
+     turnOffGuns(); 
+     updateLCD("Finished"," ");
      state = 1; //Back to State 1
      }
 }
 
-//Function converts time into Minutes
-int convertMins(int current_time)
-{ 
-  int mins = current_time/60;
-  return (mins);
+//Function converts time into Minutes and Seconds
+String convertTime(int currentTime)
+{
+  int mins = currentTime/60;
+  int secs = currentTime%60;
+  String TimerSec;
+  String TimerMin;
+  String s_min = String(mins);
+  String s_sec = String(secs);
+
+//Adding Zero to Minutes that are less than 10
+  if(mins < 10)
+    TimerMin = "0"+s_min;
+  else
+    TimerMin = s_min;   
+
+//Adding Zero to Seconds that are less than 10
+  if(secs < 10)
+    TimerSec = "0"+s_sec;
+  else
+    TimerSec = s_sec;   
+    
+  return(TimerMin + ":" + TimerSec);
 }
 
-//Converts time into Seconds
-int convertSecs(int current_time)
+//Turn Off Guns
+void turnOffGuns()
 {
-  int secs = current_time%60;
-  return (secs);
+  digitalWrite(gun_a, LOW);
+  digitalWrite(gun_b, LOW);
+}
+
+//Turn On Guns
+void turnOnGuns()
+{
+  digitalWrite(gun_a, HIGH);
+  digitalWrite(gun_b, HIGH);
 }
 
 //Extracts temperature from the Sensor
@@ -205,4 +172,13 @@ float getTemperature()
   tempC = sensor.getTemp();
   Serial.println(tempC,0);
   return tempC;
+}
+
+String updateLCD(String line1, String line2)
+{
+  lcd.clear();
+  lcd.setCursor(0,0);
+  lcd.print(line1);
+  lcd.setCursor(0,1);
+  lcd.print(line2);
 }
