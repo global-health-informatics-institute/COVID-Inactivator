@@ -112,9 +112,9 @@ void sterilizing_gun_off()
       state = 3;
     }
   } else {
-     turnOffGuns(); 
-     updateLCD("Finished"," ");
-     state = 1; //Back to State 1
+       turnOffGuns(); 
+       updateLCD("Finished"," ");
+       state = 1; //Back to State 1
     }
 }
 
