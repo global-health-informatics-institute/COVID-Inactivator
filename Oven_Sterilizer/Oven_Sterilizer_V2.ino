@@ -10,7 +10,6 @@ const int gun_b = 4;
 float tempC = 0;
 int buttonEndState;
 int buttonStartState;         // variable for reading the pushbutton status 
-int current_gun;        // variable for reading the pushbutton status
 int state =1;
 int timeCount;
 String convertedTemp;
