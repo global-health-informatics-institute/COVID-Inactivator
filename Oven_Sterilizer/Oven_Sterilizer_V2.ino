@@ -8,7 +8,6 @@ const int buttonPin = 5;     // the number of the pushbutton pin
 const int gun_a = 2;
 const int gun_b = 4;
 float tempC = 0;
-int activeGun;
 int buttonEndState;
 int buttonStartState;         // variable for reading the pushbutton status 
 int current_gun;        // variable for reading the pushbutton status
@@ -30,24 +29,19 @@ void setup()
   lcd.begin();
   lcd.backlight();
   //Initialize the I2C sensor and ping it
-  sensor.begin();
-    
+  sensor.begin();   
 }
 
 void loop() 
 {
   if (state == 1)
     waiting();
-
   else if (state == 2)
     preheat();
-
   else if (state == 3)
     sterilizing_gun_on();
-  
   else if (state == 4)
     sterilizing_gun_off();
- 
   delay(1000);
 }
 
@@ -60,12 +54,11 @@ void waiting()
   delay(1000);
   buttonEndState = digitalRead(buttonPin);
   if(buttonStartState != buttonEndState){
-    //Serial.println("Button was pressed. Toggle Oven state");
     digitalWrite(buttonPin, 0);
     state =2;
-  } else{
+  } else
       waiting();  
-    }
+    
 }
 
 //State 2
@@ -79,9 +72,9 @@ void preheat()
      //Switching State
      state =3;
      timeCount = 1800;   
-   } else{
+   } else
        turnOnGuns();
-     }
+     
 }
 
 //state 3
@@ -119,11 +112,10 @@ void sterilizing_gun_off()
       state = 3;
     }
   } else {
-     //Turning on Both Guns
      turnOffGuns(); 
      updateLCD("Finished"," ");
      state = 1; //Back to State 1
-     }
+    }
 }
 
 //Function converts time into Minutes and Seconds
@@ -135,19 +127,16 @@ String convertTime(int currentTime)
   String TimerMin;
   String s_min = String(mins);
   String s_sec = String(secs);
-
 //Adding Zero to Minutes that are less than 10
   if(mins < 10)
     TimerMin = "0"+s_min;
   else
     TimerMin = s_min;   
-
 //Adding Zero to Seconds that are less than 10
   if(secs < 10)
     TimerSec = "0"+s_sec;
   else
-    TimerSec = s_sec;   
-    
+    TimerSec = s_sec;     
   return(TimerMin + ":" + TimerSec);
 }
 
@@ -165,10 +154,9 @@ void turnOnGuns()
   digitalWrite(gun_b, HIGH);
 }
 
-//Extracts temperature from the Sensor
+//Extracts temperature from the Si7021 Sensor
 float getTemperature()
 {
-  //Measure Temperature from Si7021
   tempC = sensor.getTemp();
   Serial.println(tempC,0);
   return tempC;
