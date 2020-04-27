@@ -1,1 +1,1 @@
-# OVID-Inactivator
+# COVID-Inactivator
