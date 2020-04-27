@@ -16,7 +16,6 @@ String convertedTemp;
 
 LiquidCrystal_I2C lcd(0x27,20,4);  // set the LCD address to 0x27 for a 16 chars and 2 line display
 Weather sensor;
-Weather sensor_upper_chamber;
 
 void setup() 
 {
@@ -25,8 +24,6 @@ void setup()
   pinMode(buttonPin, INPUT);
   digitalWrite(buttonPin, 0);
   Serial.begin(9600);
-  lcd.begin();
-  lcd.backlight();
   //Initialize the I2C sensor and ping it
   sensor.begin();   
 }
@@ -47,6 +44,8 @@ void loop()
 //State 1
 void waiting()
 {
+  lcd.begin();
+  lcd.backlight();
  //Set LCD to Push Button to Start
   updateLCD("PUSH THE BUTTON", "TO START");
   buttonStartState = digitalRead(buttonPin);
@@ -63,9 +62,9 @@ void waiting()
 //State 2
 void preheat()
 {
-   float checkedTemp = (getTemperature(),0);
+   int checkedTemp = (getTemperature(),0);
    convertedTemp =  String(checkedTemp);
-   updateLCD("Preheating..", convertedTemp);
+   updateLCD("Preheating...", convertedTemp + "" +"/77" + "" +F("\xDF""C"));
    //Checking temp from sensor vs set low temperature
    if(checkedTemp > low_temp ){
      //Switching State
@@ -81,9 +80,9 @@ void sterilizing_gun_on()
 {
   //Checking temp once per second from the main loop
   if(timeCount > 0){
-    float checkedTemp = (getTemperature(),0);
+    int checkedTemp = (getTemperature(),0);
     convertedTemp =  String(checkedTemp);
-    updateLCD("Inactivating...", convertedTemp + " " + F("\xDF""C.") + " " + "Timer:" + convertTime(timeCount) );
+    updateLCD("Inactivating...", convertedTemp + "" + F("\xDF""C.") + "" + "Timer:" + convertTime(timeCount) );
     timeCount = timeCount - 1;
     if(checkedTemp > high_temp){
       turnOffGuns(); 
@@ -101,7 +100,7 @@ void sterilizing_gun_off()
 {
   //Checking temp once per second from the main loop
   if(timeCount > 0){
-    float checkedTemp = (getTemperature(),0);
+    int checkedTemp = (getTemperature(),0);
     convertedTemp =  String(checkedTemp);
     updateLCD("Inactivating...", convertedTemp + " " + F("\xDF""C.") + " " + "Timer:" + convertTime(timeCount) );
     timeCount = timeCount - 1;
