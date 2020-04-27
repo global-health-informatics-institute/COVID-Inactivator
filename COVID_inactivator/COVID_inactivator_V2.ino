@@ -2,27 +2,32 @@
 #include "SparkFun_Si7021_Breakout_Library.h"
 #include <Wire.h>
 
-const float high_temp = 77;
-const float low_temp = 76;
-const int buttonPin = 5;     // the number of the pushbutton pin
-const int gun_a = 2;
-const int gun_b = 4;
+const int high_temp = 77;
+const int low_temp = 76;
+const byte buttonPin = 5;     // the number of the pushbutton pin
+const byte gun_a = 2;
+const byte gun_b = 4;
 float tempC = 0;
-int buttonEndState;
-int buttonStartState;         // variable for reading the pushbutton status 
 int state =1;
 int timeCount;
 String convertedTemp;
-
+volatile byte last_button_state = LOW;
 LiquidCrystal_I2C lcd(0x27,20,4);  // set the LCD address to 0x27 for a 16 chars and 2 line display
 Weather sensor;
+
+//Start system Button
+void IRAM_ATTR systemInitialize()
+{
+  last_button_state = !last_button_state;
+  preheat();
+}
 
 void setup() 
 {
   pinMode(gun_a, OUTPUT);
   pinMode(gun_b, OUTPUT);
-  pinMode(buttonPin, INPUT);
-  digitalWrite(buttonPin, 0);
+  pinMode(buttonPin, INPUT_PULLUP);
+  attachInterrupt(digitalPinToInterrupt(buttonPin), systemInitialize, CHANGE);
   Serial.begin(9600);
   //Initialize the I2C sensor and ping it
   sensor.begin();   
@@ -38,7 +43,6 @@ void loop()
     sterilizing_gun_on();
   else if (state == 4)
     sterilizing_gun_off();
-  delay(1000);
 }
 
 //State 1
@@ -47,16 +51,7 @@ void waiting()
   lcd.begin();
   lcd.backlight();
  //Set LCD to Push Button to Start
-  updateLCD("PUSH THE BUTTON", "TO START");
-  buttonStartState = digitalRead(buttonPin);
-  delay(1000);
-  buttonEndState = digitalRead(buttonPin);
-  if(buttonStartState != buttonEndState){
-    digitalWrite(buttonPin, 0);
-    state =2;
-  } else
-      waiting();  
-    
+  updateLCD("PUSH THE BUTTON", "TO START");    
 }
 
 //State 2
@@ -64,15 +59,14 @@ void preheat()
 {
    int checkedTemp = (getTemperature(),0);
    convertedTemp =  String(checkedTemp);
-   updateLCD("Preheating...", convertedTemp + "" +"/77" + "" +F("\xDF""C"));
+   updateLCD("Preheating...", convertedTemp + "" +"/"+""+ high_temp +"" +F("\xDF""C"));
    //Checking temp from sensor vs set low temperature
    if(checkedTemp > low_temp ){
      //Switching State
      state =3;
      timeCount = 1800;   
    } else
-       turnOnGuns();
-     
+       turnOnGuns();    
 }
 
 //state 3
