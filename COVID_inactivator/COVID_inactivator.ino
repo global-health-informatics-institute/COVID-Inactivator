@@ -5,15 +5,22 @@
 
 int current_gun;
 int buttonState;         // variable for reading the pushbutton status
+<<<<<<< HEAD
 int buttonStartState;         // variable for reading the pushbutton status
 int buttonEndState;         // variable for reading the pushbutton status
+=======
+>>>>>>> 9d5ebb5adea6da19f785334bbe35d1e52dd58078
 int state =1;
 float low_temp = 63;
 float high_temp = 65;
 float tempC = 0;
 const int gun_a = 2;
 const int gun_b = 4;
+<<<<<<< HEAD
 const int buttonPin = 5;     // the number of the pushbutton pin
+=======
+const int buttonPin = 14;     // the number of the pushbutton pin
+>>>>>>> 9d5ebb5adea6da19f785334bbe35d1e52dd58078
 unsigned long period = 1800000; //the amount of time to complete single sterilizing , 30 minutes
 unsigned long start_time;
 unsigned long timer;
@@ -42,6 +49,7 @@ void loop() {
     waiting();
   }
 
+<<<<<<< HEAD
   else if (state == 2){
     preheat();
   }
@@ -49,6 +57,12 @@ void loop() {
   else if (state == 3){
     sterilizing();
   }
+=======
+  if (state == 2){
+    
+  }
+
+>>>>>>> 9d5ebb5adea6da19f785334bbe35d1e52dd58078
   
   delay(1000);
 }
@@ -63,6 +77,7 @@ void waiting(){
   lcd.setCursor(1,1);
   lcd.print("TO START");
   state = 1;
+<<<<<<< HEAD
   
   buttonStartState = digitalRead(buttonPin);
   delay(1000);
@@ -73,6 +88,22 @@ void waiting(){
     preheat();  
   }
 
+=======
+  // read the state of the pushbutton value:
+  buttonState = digitalRead(buttonPin);
+  Serial.println(buttonState);
+  // check if the pushbutton is pressed. If it is, the buttonState is HIGH:
+  if (buttonState == HIGH) {
+    digitalWrite(buttonState, HIGH);
+    Serial.println(buttonState);
+    delay(500);
+    state =2;
+    //preheat();
+  } else{
+    waiting();
+  }
+  
+>>>>>>> 9d5ebb5adea6da19f785334bbe35d1e52dd58078
 }
 
 //State 2
@@ -145,7 +176,11 @@ void sterilizing(){
            
           else if(current_gun == 2){
             //turn off first gun
+<<<<<<< HEAD
                 Serial.println((period - start_time));
+=======
+            Serial.println((period - start_time));
+>>>>>>> 9d5ebb5adea6da19f785334bbe35d1e52dd58078
                 timer = period - millis();
                 tseconds = timer / 1000;
                 tminutes = tseconds / 60;
@@ -176,6 +211,7 @@ void sterilizing(){
               
               if(getTemperature() <= low_temp )
               {
+<<<<<<< HEAD
                 Serial.println((period - start_time));
                 timer = period - millis();
                 tseconds = timer / 1000;
@@ -187,6 +223,8 @@ void sterilizing(){
                 lcd.print(tminutes);
                 lcd.print(":");
                 lcd.print(seconds);
+=======
+>>>>>>> 9d5ebb5adea6da19f785334bbe35d1e52dd58078
                   while(getTemperature() <= high_temp){
                    digitalWrite(current_gun, HIGH); 
                    Serial.println((millis()-start_time));
@@ -240,6 +278,7 @@ void sterilizing(){
               
               if(getTemperature() <= low_temp )
               {
+<<<<<<< HEAD
                    Serial.println((period - start_time));
                 timer = period - millis();
                 tseconds = timer / 1000;
@@ -251,6 +290,8 @@ void sterilizing(){
                 lcd.print(tminutes);
                 lcd.print(":");
                 lcd.print(seconds);
+=======
+>>>>>>> 9d5ebb5adea6da19f785334bbe35d1e52dd58078
                   while(getTemperature() <= high_temp){
                    Serial.println((period - start_time));
                    timer = period - millis();
